@@ -26,12 +26,20 @@ type pixelColor struct {
 
 func main() {
 	var inputDir string
+	var isSmoothRender bool = false
 
 	flag.StringVar(&inputDir, "input", "examples/26-04", "directory containing PNG images")
 	flag.Parse()
 
-	// Allow positional argument to override input directory
-	if len(flag.Args()) > 0 {
+	if len(flag.Args()) == 0 {
+		// No positional argument – trigger download
+		var err error
+		inputDir, err = downloadImages()
+		if err != nil {
+			log.Fatalf("failed to download images: %v", err)
+		}
+	} else {
+		// Positional argument overrides the default input directory
 		inputDir = flag.Args()[0]
 	}
 
@@ -78,7 +86,7 @@ func main() {
 	result := image.NewRGBA(image.Rect(0, 0, baseW, baseH))
 
 	// For each pixel position compute dominant color.
-	totalImages := len(imgList)
+
 	for y := 0; y < baseH; y++ {
 		for x := 0; x < baseW; x++ {
 			freq := make(map[color.RGBA]int)
@@ -89,21 +97,43 @@ func main() {
 				freq[key]++
 			}
 			// Find color with max count.
-			var maxC color.RGBA
+			var maxC color.RGBA = color.RGBA{0xff, 0xff, 0xff, 0xff}
+			var max2C color.RGBA = color.RGBA{0xff, 0xff, 0xff, 0xff}
 			maxCnt := -1
+			max2Cnt := -1
 			for col, cnt := range freq {
 				if cnt > maxCnt {
+					max2Cnt = maxCnt
+					max2C = maxC
 					maxCnt = cnt
 					maxC = col
 				}
+				if (cnt > max2Cnt) && (maxC != col) {
+					max2Cnt = cnt
+					max2C = col
+				}
 			}
-			// Compute dominance as percentage of dominance.
-			dominance := float64(maxCnt) / float64(totalImages)
-			scaledR := uint8(float64(maxC.R)*dominance + 255*(1-dominance))
-			scaledG := uint8(float64(maxC.G)*dominance + 255*(1-dominance))
-			scaledB := uint8(float64(maxC.B)*dominance + 255*(1-dominance))
+			if max2Cnt == -1 {
+				max2C = maxC
+			}
+			if isSmoothRender {
+				w1 := float64(maxCnt) / float64(maxCnt+max2Cnt)
+				w2 := float64(max2Cnt) / float64(maxCnt+max2Cnt)
 
-			result.SetRGBA(x, y, color.RGBA{R: scaledR, G: scaledG, B: scaledB, A: 255})
+				r := uint8(float64(maxC.R)*w1 + float64(max2C.R)*w2)
+				g := uint8(float64(maxC.G)*w1 + float64(max2C.G)*w2)
+				b := uint8(float64(maxC.B)*w1 + float64(max2C.B)*w2)
+
+				result.SetRGBA(x, y, color.RGBA{R: r, G: g, B: b, A: 255})
+			} else {
+				dominance := float64(maxCnt) / float64(len(imgList))
+				scaledR := uint8(float64(maxC.R)*dominance + 255*(1-dominance))
+				scaledG := uint8(float64(maxC.G)*dominance + 255*(1-dominance))
+				scaledB := uint8(float64(maxC.B)*dominance + 255*(1-dominance))
+
+				result.SetRGBA(x, y, color.RGBA{R: scaledR, G: scaledG, B: scaledB, A: 255})
+
+			}
 		}
 	}
 
