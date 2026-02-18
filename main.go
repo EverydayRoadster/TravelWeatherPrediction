@@ -85,9 +85,13 @@ func main() {
 					maxC = col
 				}
 			}
-			// Compute alpha as percentage of dominance.
-			alpha := uint8(float64(maxCnt) / float64(totalImages) * 255)
-			result.SetRGBA(x, y, color.RGBA{R: maxC.R, G: maxC.G, B: maxC.B, A: alpha})
+			// Compute dominance as percentage of dominance.
+			dominance := float64(maxCnt) / float64(totalImages)
+			scaledR := uint8(float64(maxC.R)*dominance + 255*(1-dominance))
+			scaledG := uint8(float64(maxC.G)*dominance + 255*(1-dominance))
+			scaledB := uint8(float64(maxC.B)*dominance + 255*(1-dominance))
+
+			result.SetRGBA(x, y, color.RGBA{R: scaledR, G: scaledG, B: scaledB, A: 255})
 		}
 	}
 
