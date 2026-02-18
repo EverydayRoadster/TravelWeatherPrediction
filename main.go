@@ -25,14 +25,26 @@ type pixelColor struct {
 }
 
 func main() {
-	var inputDir, outputPath string
+	var inputDir string
 
 	flag.StringVar(&inputDir, "input", "examples/26-04", "directory containing PNG images")
-	flag.StringVar(&outputPath, "output", "examples/result.png", "output image file path")
 	flag.Parse()
+
+	// Allow positional argument to override input directory
+	if len(flag.Args()) > 0 {
+		inputDir = flag.Args()[0]
+	}
 
 	if inputDir == "" {
 		log.Fatalf("input directory required")
+	}
+
+	// Derive output path from input directory name
+	outputPath := filepath.Join(filepath.Dir(inputDir), filepath.Base(inputDir)+".png")
+
+	// Ensure output directory exists
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		log.Fatalf("failed to create output directory: %v", err)
 	}
 
 	files, err := filepath.Glob(filepath.Join(inputDir, "*.png"))

@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-input", "examples/26-04", "-output", "examples/26-04.png"]
+            "args": ["examples/26-05"]
         }
     ]
 }
