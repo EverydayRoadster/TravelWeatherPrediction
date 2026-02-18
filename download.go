@@ -4,6 +4,6 @@ package main
 // and return the path to the directory where they are stored.
 // The actual implementation will be provided later.
 func downloadImages() (string, error) {
-    // TODO: implement download logic
-    return "", nil
+
+	return "", nil
 }

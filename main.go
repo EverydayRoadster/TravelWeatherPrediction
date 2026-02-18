@@ -13,6 +13,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -26,38 +27,63 @@ type pixelColor struct {
 
 func main() {
 	var inputDir string
-	var isSmoothRender bool = false
+	var renderMode string
 
-	flag.StringVar(&inputDir, "input", "examples/26-04", "directory containing PNG images")
+	flag.StringVar(&renderMode, "renderMode", "white", "enable render mode")
+	flag.StringVar(&inputDir, "input", ".noaa", "directory containing PNG images")
 	flag.Parse()
 
-	if len(flag.Args()) == 0 {
+	if inputDir == ".noaa" {
 		// No positional argument – trigger download
 		var err error
 		inputDir, err = downloadImages()
 		if err != nil {
 			log.Fatalf("failed to download images: %v", err)
 		}
-	} else {
-		// Positional argument overrides the default input directory
-		inputDir = flag.Args()[0]
 	}
 
 	if inputDir == "" {
 		log.Fatalf("input directory required")
 	}
 
-	// Derive output path from input directory name
-	outputPath := filepath.Join(filepath.Dir(inputDir), filepath.Base(inputDir)+".png")
+	err := filepath.WalkDir(inputDir, func(path string, dir fs.DirEntry, err error) error {
+		if err != nil {
+			return err // permission errors etc.
+		}
+		if !dir.IsDir() {
+			return nil
+		}
 
-	// Ensure output directory exists
-	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
-		log.Fatalf("failed to create output directory: %v", err)
+		// Check whether this directory has subdirectories
+		hasSubdirs := false
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			return err
+		}
+
+		for _, e := range entries {
+			if e.IsDir() {
+				hasSubdirs = true
+				break
+			}
+		}
+		// Leaf directory → do the work
+		if !hasSubdirs {
+			doRender(path, renderMode)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("can't walk: %v", err)
 	}
+}
+
+func doRender(inputDir string, renderMode string) {
+	outputPath := filepath.Join(filepath.Dir(inputDir), filepath.Base(inputDir)+".png")
 
 	files, err := filepath.Glob(filepath.Join(inputDir, "*.png"))
 	if err != nil || len(files) == 0 {
-		log.Fatalf("no PNG files found in %s", inputDir)
+		return
 	}
 
 	var baseW, baseH int
@@ -116,7 +142,7 @@ func main() {
 			if max2Cnt == -1 {
 				max2C = maxC
 			}
-			if isSmoothRender {
+			if renderMode == "smooth" {
 				w1 := float64(maxCnt) / float64(maxCnt+max2Cnt)
 				w2 := float64(max2Cnt) / float64(maxCnt+max2Cnt)
 
@@ -127,9 +153,16 @@ func main() {
 				result.SetRGBA(x, y, color.RGBA{R: r, G: g, B: b, A: 255})
 			} else {
 				dominance := float64(maxCnt) / float64(len(imgList))
-				scaledR := uint8(float64(maxC.R)*dominance + 255*(1-dominance))
-				scaledG := uint8(float64(maxC.G)*dominance + 255*(1-dominance))
-				scaledB := uint8(float64(maxC.B)*dominance + 255*(1-dominance))
+				confidence := 2*dominance - 1
+				if confidence < 0 {
+					confidence = 0
+				}
+				if renderMode == "dominance" {
+					confidence = dominance
+				}
+				scaledR := uint8(float64(maxC.R)*confidence + 255*(1-confidence))
+				scaledG := uint8(float64(maxC.G)*confidence + 255*(1-confidence))
+				scaledB := uint8(float64(maxC.B)*confidence + 255*(1-confidence))
 
 				result.SetRGBA(x, y, color.RGBA{R: scaledR, G: scaledG, B: scaledB, A: 255})
 
