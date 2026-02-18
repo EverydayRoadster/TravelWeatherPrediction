@@ -36,7 +36,7 @@ func main() {
 	if inputDir == ".noaa" {
 		// No positional argument – trigger download
 		var err error
-		inputDir, err = downloadImages()
+		inputDir, err = getImages(inputDir)
 		if err != nil {
 			log.Fatalf("failed to download images: %v", err)
 		}
