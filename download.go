@@ -23,11 +23,11 @@ var runs = []string{"1", "2", "3"}
 
 // downloadImages is a stub that should download a predefined set of images
 // and return the path to the directory where they are stored.
-// The actual implementation will be provided later.
 func getImages(inputDir string) (string, error) {
 	now := time.Now().UTC()
 	generationMonth := now.Format("200601")
-	generationDay := now.Format("02")
+	//	generationDayHour := now.Format("0215")
+	generationDayHour := now.Format("02")
 
 	for folderName, varCode := range variables {
 		for lead := 1; lead <= 6; lead++ {
@@ -40,7 +40,7 @@ func getImages(inputDir string) (string, error) {
 					inputDir,
 					folderName,
 					forecastMonth,
-					fmt.Sprintf("%s%s_%s.png", generationMonth, generationDay, run),
+					fmt.Sprintf("%s%s_%s.png", generationMonth, generationDayHour, run),
 				)
 				_, err := os.Stat(savePath)
 				if errors.Is(err, os.ErrNotExist) {
@@ -58,26 +58,31 @@ func getImages(inputDir string) (string, error) {
 		historyMonth := historyDate.Format("200601")
 		for lead := 1; lead <= 6; lead++ {
 			forecastMonth := historyDate.AddDate(0, lead-1, 0).Format("200601")
-			for _, run := range runs {
-				for folderName, varCode := range variables {
-					url := buildHistoryURL(varCode, run, lead, historyMonth)
-					savePath := filepath.Join(
-						inputDir,
-						folderName,
-						forecastMonth,
-						fmt.Sprintf("%s_%s.png", historyMonth, run),
-					)
-					_, err := os.Stat(savePath)
-					if errors.Is(err, os.ErrNotExist) {
-						err := download(url, savePath)
-						if err != nil {
-							fmt.Println("Error:", err)
+			// download earlier predictions with relevant forecasts only
+			if generationMonth <= forecastMonth {
+				for _, run := range runs {
+					for folderName, varCode := range variables {
+						url := buildHistoryURL(varCode, run, lead, historyMonth)
+						savePath := filepath.Join(
+							inputDir,
+							folderName,
+							forecastMonth,
+							fmt.Sprintf("%s_%s.png", historyMonth, run),
+						)
+						_, err := os.Stat(savePath)
+						if errors.Is(err, os.ErrNotExist) {
+							err := download(url, savePath)
+							if err != nil {
+								fmt.Println("Error:", err)
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+
+	cleanupOldForecasts(inputDir, now)
 
 	return inputDir, nil
 }
@@ -135,4 +140,46 @@ func download(url, path string) error {
 
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func cleanupOldForecasts(inputDir string, now time.Time) error {
+	currentMonth := now.Format("200601")
+
+	for folderName := range variables {
+		varDir := filepath.Join(inputDir, folderName)
+		entries, err := os.ReadDir(varDir)
+		if err != nil {
+			continue
+		}
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				continue
+			}
+			forecastMonth := entry.Name()
+			// If forecast month is before current month → delete
+			if forecastMonth < currentMonth {
+				fullPath := filepath.Join(varDir, forecastMonth)
+				fmt.Println("Deleting old forecast folder:", fullPath)
+				err := os.RemoveAll(fullPath)
+				if err != nil {
+					fmt.Println("Error deleting:", err)
+				}
+			}
+			// If forecast month is current month → delete daily results
+			if forecastMonth == currentMonth {
+				prevDate := now.AddDate(0, -1, 0)
+				prevMonth := prevDate.Format("200601")
+
+				matches, _ := filepath.Glob(filepath.Join(varDir, forecastMonth, prevMonth+"??_?.png"))
+				for _, matching := range matches {
+					err = os.Remove(matching)
+					if err != nil {
+						fmt.Println("Error deleting:", err)
+					}
+				}
+			}
+		}
+	}
+
+	return nil
 }
