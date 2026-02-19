@@ -26,24 +26,21 @@ var runs = []string{"1", "2", "3"}
 // The actual implementation will be provided later.
 func getImages(inputDir string) (string, error) {
 	now := time.Now().UTC()
-	// 202602
 	generationMonth := now.Format("200601")
+	generationDay := now.Format("02")
 
 	for folderName, varCode := range variables {
-
 		for lead := 1; lead <= 6; lead++ {
 
 			forecastMonth := now.AddDate(0, lead, 0).Format("200601")
-
 			for _, run := range runs {
 
 				url := buildCurrentURL(varCode, run, lead)
-
 				savePath := filepath.Join(
 					inputDir,
 					folderName,
 					forecastMonth,
-					fmt.Sprintf("%s_%s.png", generationMonth, run),
+					fmt.Sprintf("%s%s_%s.png", generationMonth, generationDay, run),
 				)
 				_, err := os.Stat(savePath)
 				if errors.Is(err, os.ErrNotExist) {
