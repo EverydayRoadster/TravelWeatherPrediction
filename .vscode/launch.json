@@ -29,20 +29,28 @@
             "args": ["-input", "./examples/", "-renderMode", "smooth"]
         },
         {
-            "name": "NOAA ",
+            "name": "NOAA white",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": []
+            "args": ["-output", "./generated/white/"]
         },
         {
-            "name": "NOAA dominance",
+            "name": "NOAA confidence",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-renderMode", "dominance"]
+            "args": ["-renderMode", "confidence", "-output", "./generated/confidence/"]
+        },
+        {
+            "name": "NOAA smooth",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["-renderMode", "smooth", "-output", "./generated/smooth/"]
         }
 
     ]

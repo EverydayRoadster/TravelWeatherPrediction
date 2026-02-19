@@ -17,33 +17,36 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
-// pixelColor holds a color and its occurrence count.
-type pixelColor struct {
-	c   color.Color
-	cnt int
-}
+type Constant int
+
+const (
+	RENDER_WHITE Constant = iota
+	RENDER_SMOOTH
+	RENDER_CONFIDENCE
+	DEFAULT_NOAA_DIR
+)
+
+var CNST = []string{"white", "smooth", "confidence", ".noaa"}
 
 func main() {
-	var inputDir string
+	var inputDir, outputDir string
 	var renderMode string
 
-	flag.StringVar(&renderMode, "renderMode", "white", "enable render mode")
-	flag.StringVar(&inputDir, "input", ".noaa", "directory containing PNG images")
+	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_WHITE], "enable render mode")
+	flag.StringVar(&inputDir, "input", CNST[DEFAULT_NOAA_DIR], "directory containing PNG images or directories of PNG images")
+	flag.StringVar(&outputDir, "output", ".", "directory for result PNG images")
 	flag.Parse()
 
-	if inputDir == ".noaa" {
-		// No positional argument – trigger download
+	if slices.Contains([]string{CNST[DEFAULT_NOAA_DIR], ""}, inputDir) {
+		// No argument – trigger download
 		var err error
 		inputDir, err = getImages(inputDir)
 		if err != nil {
 			log.Fatalf("failed to download images: %v", err)
 		}
-	}
-
-	if inputDir == "" {
-		log.Fatalf("input directory required")
 	}
 
 	err := filepath.WalkDir(inputDir, func(path string, dir fs.DirEntry, err error) error {
@@ -69,7 +72,7 @@ func main() {
 		}
 		// Leaf directory → do the work
 		if !hasSubdirs {
-			doRender(path, renderMode)
+			doRender(path, renderMode, outputDir)
 		}
 		return nil
 	})
@@ -78,9 +81,7 @@ func main() {
 	}
 }
 
-func doRender(inputDir string, renderMode string) {
-	outputPath := filepath.Join(filepath.Dir(inputDir), filepath.Base(inputDir)+".png")
-
+func doRender(inputDir, renderMode, outputDir string) {
 	files, err := filepath.Glob(filepath.Join(inputDir, "*.png"))
 	if err != nil || len(files) == 0 {
 		return
@@ -142,7 +143,7 @@ func doRender(inputDir string, renderMode string) {
 			if max2Cnt == -1 {
 				max2C = maxC
 			}
-			if renderMode == "smooth" {
+			if renderMode == CNST[RENDER_SMOOTH] {
 				w1 := float64(maxCnt) / float64(maxCnt+max2Cnt)
 				w2 := float64(max2Cnt) / float64(maxCnt+max2Cnt)
 
@@ -152,25 +153,28 @@ func doRender(inputDir string, renderMode string) {
 
 				result.SetRGBA(x, y, color.RGBA{R: r, G: g, B: b, A: 255})
 			} else {
-				dominance := float64(maxCnt) / float64(len(imgList))
-				confidence := 2*dominance - 1
-				if confidence < 0 {
-					confidence = 0
-				}
-				if renderMode == "dominance" {
-					confidence = dominance
+				confidence := float64(maxCnt) / float64(len(imgList)) // towards white
+				if renderMode == CNST[RENDER_CONFIDENCE] {            // towards 50%
+					confidence = 2*confidence - 1
+					if confidence < 0 {
+						confidence = 0
+					}
 				}
 				scaledR := uint8(float64(maxC.R)*confidence + 255*(1-confidence))
 				scaledG := uint8(float64(maxC.G)*confidence + 255*(1-confidence))
 				scaledB := uint8(float64(maxC.B)*confidence + 255*(1-confidence))
 
 				result.SetRGBA(x, y, color.RGBA{R: scaledR, G: scaledG, B: scaledB, A: 255})
-
 			}
 		}
 	}
+	outputPath := filepath.Join(filepath.Dir(outputDir), filepath.Base(filepath.Dir(inputDir)))
+	err = os.MkdirAll(outputPath, 0755)
+	if err != nil {
+		log.Fatalf("failed to create output directory: %v", err)
+	}
 
-	outFile, err := os.Create(outputPath)
+	outFile, err := os.Create(filepath.Join(outputPath, filepath.Base(inputDir)+".png"))
 	if err != nil {
 		log.Fatalf("failed to create output file: %v", err)
 	}
