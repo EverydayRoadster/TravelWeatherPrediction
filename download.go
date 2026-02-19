@@ -110,7 +110,7 @@ func buildHistoryURL(variable, run string, lead int, historyMonth string) string
 
 func download(url, path string) error {
 
-	fmt.Println("Downloading:", url)
+	fmt.Println("Downloading: ", url)
 
 	resp, err := http.Get(url)
 	if err != nil {

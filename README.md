@@ -6,6 +6,8 @@ The maps right now are limited to the European region. Predictions are available
 
 Purpose of this program is, to provide a consolidated single view across the many computational results provided by NOAA, for a better overview and understanding of expected climate. The maps should not be understood as a precise weather report, rather an indication to upcoming climate conditions for broader regions.
 
+Images downloaded from NOAA are stored unter directory -noaa. Once downloaded, those images will always be reused. Obsolete source images are being cleaned up when program runs.
+
 Travel Weather Prediction offers three methods, on how the results of NOAA are consolidated, known as "renderMode":
 
 - white : a color indicates to most dominent across all sample images, respectively to occuranc is blended towards white. E.g. a dot being red in 75% of the images is selected as dominant color, but given with 75% opacity towards white. 
@@ -18,7 +20,7 @@ Travel Weather Prediction offers three methods, on how the results of NOAA are c
 
 Travel Weather Prediction requires go installed on a computer.
 
-go run https://github.com/EverydayRoadster/TravelWeatherPrediction
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest
 
 If no arguments are specified, the program will download images from NOAA into folder ".noaa" and store computed images to current directory.
 
@@ -26,4 +28,4 @@ Program arguments available:
 
 - input $inputdirectory : input directory from where to read images from. For any other directories than ".noaa" (default), no image download will occure. Images will be processed for any subdirectory where there is no more subdirectory (leaf directory only).
 - output $outputdirectory : Where the result image files stored to. Defaults to .
-- renderMode [white|confidence|smooth]: render method (see above for details).
+- renderMode $[white|confidence|smooth]: render method (see above for details).
