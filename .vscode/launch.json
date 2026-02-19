@@ -51,7 +51,14 @@
             "mode": "auto",
             "program": "${workspaceFolder}",
             "args": ["-renderMode", "smooth", "-output", "./generated/smooth/"]
+        },
+        {
+            "name": "NOAA wrong",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["-renderMode", "wrong", "-output", "./generated/wrong/"]
         }
-
     ]
 }

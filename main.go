@@ -40,6 +40,11 @@ func main() {
 	flag.StringVar(&outputDir, "output", ".", "directory for result PNG images")
 	flag.Parse()
 
+	if !slices.Contains([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
+		log.Printf("render mode %s not supported.", renderMode)
+		return
+	}
+
 	if slices.Contains([]string{CNST[DEFAULT_NOAA_DIR], ""}, inputDir) {
 		// No argument – trigger download
 		var err error
