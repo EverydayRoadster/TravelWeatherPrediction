@@ -1,5 +1,4 @@
+.noaa
 examples/*
 generated/*
 .DS_Store
-claude.md
-.noaa

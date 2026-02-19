@@ -18,8 +18,8 @@ var variables = map[string]string{
 	"Europe_Prec": "euPrec",
 }
 
-// var runs = []string{"E1", "E2", "E3"}
-var runs = []string{"1", "2", "3"}
+// var ensemble = []string{"E1", "E2", "E3"}
+var ensemble = []string{"1", "2", "3"}
 
 // downloadImages is a stub that should download a predefined set of images
 // and return the path to the directory where they are stored.
@@ -33,7 +33,7 @@ func getImages(inputDir string) (string, error) {
 		for lead := 1; lead <= 6; lead++ {
 
 			forecastMonth := now.AddDate(0, lead, 0).Format("200601")
-			for _, run := range runs {
+			for _, run := range ensemble {
 
 				url := buildCurrentURL(varCode, run, lead)
 				savePath := filepath.Join(
@@ -60,7 +60,7 @@ func getImages(inputDir string) (string, error) {
 			forecastMonth := historyDate.AddDate(0, lead-1, 0).Format("200601")
 			// download earlier predictions with relevant forecasts only
 			if generationMonth <= forecastMonth {
-				for _, run := range runs {
+				for _, run := range ensemble {
 					for folderName, varCode := range variables {
 						url := buildHistoryURL(varCode, run, lead, historyMonth)
 						savePath := filepath.Join(
@@ -88,9 +88,6 @@ func getImages(inputDir string) (string, error) {
 }
 
 func buildCurrentURL(variable, run string, lead int) string {
-	// https://www.cpc.ncep.noaa.gov/products/CFSv2/imagesInd1/euT2mMonInd1.gif
-	//	<baseURL>imagesInd<run>/<variable>MonInd<lead>.gif
-
 	return fmt.Sprintf(
 		"%simagesInd%s/%sMonInd%d.gif",
 		baseURL,
@@ -101,9 +98,6 @@ func buildCurrentURL(variable, run string, lead int) string {
 }
 
 func buildHistoryURL(variable, run string, lead int, historyMonth string) string {
-	// https://www.cpc.ncep.noaa.gov/products/CFSv2/cfsv2_fcst_history/202602/imagesInd1/euT2mMonInd1.gif
-	//	<baseURL><historyMonth>/imagesInd<run>/<variable>MonInd<lead>.gif
-
 	return fmt.Sprintf(
 		"%s%s/imagesInd%s/%sMonInd%d.gif",
 		historyURL,
@@ -142,7 +136,7 @@ func download(url, path string) error {
 	return err
 }
 
-func cleanupOldForecasts(inputDir string, now time.Time) error {
+func cleanupOldForecasts(inputDir string, now time.Time) {
 	currentMonth := now.Format("200601")
 
 	for folderName := range variables {
@@ -166,20 +160,16 @@ func cleanupOldForecasts(inputDir string, now time.Time) error {
 				}
 			}
 			// If forecast month is current month → delete daily results
-			if forecastMonth == currentMonth {
-				prevDate := now.AddDate(0, -1, 0)
-				prevMonth := prevDate.Format("200601")
-
-				matches, _ := filepath.Glob(filepath.Join(varDir, forecastMonth, prevMonth+"??_?.png"))
-				for _, matching := range matches {
-					err = os.Remove(matching)
-					if err != nil {
-						fmt.Println("Error deleting:", err)
-					}
-				}
-			}
+			/*			if forecastMonth == currentMonth {
+						prevMonth := now.AddDate(0, -1, 0).Format("200601")
+						matches, _ := filepath.Glob(filepath.Join(varDir, forecastMonth, prevMonth+"??_?.png"))
+						for _, matching := range matches {
+							fmt.Println("Deleting old daily forecast file:", matching)
+							if err != os.Remove(matching) {
+								fmt.Println("Error deleting:", err)
+							}
+						}
+					} */
 		}
 	}
-
-	return nil
 }
