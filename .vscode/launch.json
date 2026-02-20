@@ -34,7 +34,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-output", "./generated/white/"]
+            "args": ["-output", "./generated/"]
         },
         {
             "name": "NOAA confidence",
@@ -42,7 +42,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-renderMode", "confidence", "-output", "./generated/confidence/"]
+            "args": ["-renderMode", "confidence", "-output", "./generated"]
         },
         {
             "name": "NOAA smooth",
@@ -50,7 +50,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-renderMode", "smooth", "-output", "./generated/smooth/"]
+            "args": ["-renderMode", "smooth", "-output", "./generated"]
         },
         {
             "name": "NOAA wrong",
@@ -58,7 +58,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-renderMode", "wrong", "-output", "./generated/wrong/"]
+            "args": ["-renderMode", "wrong", "-output", "./generated/"]
         }
     ]
 }

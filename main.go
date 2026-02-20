@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
 type Constant int
@@ -35,9 +36,9 @@ func main() {
 	var inputDir, outputDir string
 	var renderMode string
 
-	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_WHITE], "enable render mode")
+	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_WHITE], "enabled render mode: "+strings.Join([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, ","))
 	flag.StringVar(&inputDir, "input", CNST[DEFAULT_NOAA_DIR], "directory containing PNG images or directories of PNG images")
-	flag.StringVar(&outputDir, "output", ".", "directory for result PNG images")
+	flag.StringVar(&outputDir, "output", ".", "directory for result PNG images. renderMode will be appended to this path.")
 	flag.Parse()
 
 	if !slices.Contains([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
@@ -173,7 +174,7 @@ func doRender(inputDir, renderMode, outputDir string) {
 			}
 		}
 	}
-	outputPath := filepath.Join(filepath.Dir(outputDir), filepath.Base(filepath.Dir(inputDir)))
+	outputPath := filepath.Join(outputDir, renderMode, filepath.Base(filepath.Dir(inputDir)))
 	err = os.MkdirAll(outputPath, 0755)
 	if err != nil {
 		log.Fatalf("failed to create output directory: %v", err)
