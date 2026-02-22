@@ -174,13 +174,12 @@ func doRender(inputDir, renderMode, outputDir string) {
 			}
 		}
 	}
-	outputPath := filepath.Join(outputDir, renderMode, filepath.Base(filepath.Dir(inputDir)))
-	err = os.MkdirAll(outputPath, 0755)
+	err = os.MkdirAll(outputDir, 0755)
 	if err != nil {
 		log.Fatalf("failed to create output directory: %v", err)
 	}
 
-	outFile, err := os.Create(filepath.Join(outputPath, filepath.Base(inputDir)+".png"))
+	outFile, err := os.Create(filepath.Join(outputDir, filepath.Base(inputDir)+"_"+filepath.Base(filepath.Dir(inputDir))+"_"+renderMode+".png"))
 	if err != nil {
 		log.Fatalf("failed to create output file: %v", err)
 	}
@@ -190,5 +189,5 @@ func doRender(inputDir, renderMode, outputDir string) {
 		log.Fatalf("failed to encode PNG: %v", err)
 	}
 
-	fmt.Printf("Result image written to %s\n", outputPath)
+	fmt.Printf("Result image written to %s\n", outputDir)
 }
