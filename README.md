@@ -1,31 +1,188 @@
 # Travel Weather Prediction
 
-Travel Weather Prediction generates images for a better understanding to weather trends of an upcoming travel season. For this, it overlays monthly forecast images provided by NOAA. 
+**Travel Weather Prediction** generates visual summaries to help interpret seasonal weather trends for upcoming travel periods.  
+It processes and overlays monthly forecast maps provided by the U.S. National Oceanic and Atmospheric Administration (NOAA), Climate Prediction Center (CPC), to create consolidated visual insights.
 
-The maps right now are limited to the European region. Predictions are available for up half a year in advance of the current date. 
+> ⚠️ These maps are not precise weather forecasts.  
+> They represent broader climate trends and probabilities across larger regions.
 
-Purpose of this program is, to provide a consolidated single view across the many computational results provided by NOAA, for a better overview and understanding of expected climate. The maps should not be understood as a precise weather report, rather an indication to upcoming climate conditions for broader regions.
+Currently, map coverage is limited to Europe. Forecast data is typically available up to six months in advance from the current date.
 
-Images downloaded from NOAA are stored unter directory -noaa. Once downloaded, those images will always be reused. Obsolete source images are being cleaned up when program runs.
+---
 
-Travel Weather Prediction offers three methods, on how the results of NOAA are consolidated, known as "renderMode":
+## Purpose
 
-- white : a color indicates to most dominent across all sample images, respectively to occuranc is blended towards white. E.g. a dot being red in 75% of the images is selected as dominant color, but given with 75% opacity towards white. 
+NOAA provides multiple computational forecast outputs. While scientifically robust, reviewing them individually can make it difficult to quickly grasp overall climate tendencies.
 
-- confidence : the same as white, but with the blending performed to a 50% baseline. Meaning: there has to be more than 50% of a color to be dominant at a given dot, and the opacity will be more faint. E.g. a dot being red in 75% of the images is selected as dominant color, but given with 50% opacity towards white (which is normalized to a 50% level).
+This tool consolidates those results into a single, unified image to:
 
-- smooth : the same as white, but the dominant color is blended towards the 2nd most dominant color. This usually generates more saturated images to look at.
+- Improve readability  
+- Highlight dominant trends  
+- Provide a quick seasonal overview for travel planning  
 
-## Usage
+---
 
-Travel Weather Prediction requires go installed on a computer.
+## Data Handling
 
+- Source images downloaded from NOAA are stored in the directory `.noaa`.
+- Downloaded images are reused in subsequent runs.
+- Obsolete source images are automatically cleaned up when the program runs.
+- If a custom input directory is used, no automatic download occurs.
+
+---
+
+## Rendering Modes
+
+The program supports three different methods for consolidating NOAA forecast results.  
+Each mode defines how dominant colors are determined and blended.
+
+### 1. `white` (default)
+
+The most dominant color at each pixel across all sample images is selected.
+
+The opacity of that color is blended toward white according to its frequency.
+
+**Example:**  
+If a pixel is red in 75% of the images:
+- Red is selected as the dominant color.
+- It is rendered with 75% opacity blended toward white.
+
+This mode visually expresses both dominance and strength of agreement.
+
+---
+
+### 2. `confidence`
+
+Similar to `white`, but with a stricter dominance threshold and reduced opacity.
+
+- A color must exceed a 50% baseline to be considered dominant.
+- Opacity is normalized relative to that 50% threshold.
+- The resulting image appears softer and emphasizes stronger consensus areas.
+
+**Example:**  
+If red appears in 75% of the images:
+- Red is selected as dominant.
+- It is rendered with 50% opacity (normalized against the 50% confidence baseline).
+
+This mode emphasizes statistical confidence over visual intensity.
+
+---
+
+### 3. `smooth`
+
+Instead of blending the dominant color toward white, this mode blends it toward the second most dominant color.
+
+This produces:
+- More saturated results  
+- Smoother transitions  
+- Stronger visual contrast  
+
+It is typically more visually striking than the other modes.
+
+---
+
+## Installation & Usage
+
+### Requirements
+
+- Go must be installed on your system.
+
+### Run directly without cloning
+
+```bash
 go run github.com/EverydayRoadster/TravelWeatherPrediction@latest
+```
 
-If no arguments are specified, the program will download images from NOAA into folder ".noaa" and store computed images to current directory.
+---
 
-Program arguments available:
+---
 
-- input $inputdirectory : input directory from where to read images from. For any other directories than ".noaa" (default), no image download will occure. Images will be processed for any subdirectory where there is no more subdirectory (leaf directory only).
-- output $outputdirectory : Where the result image files stored to. Defaults to .
-- renderMode $[white|confidence|smooth]: render method (see above for details).
+## Command Line Arguments (Detailed)
+
+The following command line flags are available:
+
+### `-renderMode`
+
+Defines how forecast images are consolidated.
+
+**Default:** `white`  
+**Allowed values:** `white`, `smooth`, `confidence`
+
+If an unsupported value is provided, the program prints:
+
+```text
+render mode <value> not supported.
+```
+
+and exits without processing.
+
+#### Available Modes
+
+| Mode | Description |
+|------|------------|
+| `white` | Selects the dominant color per pixel and blends it toward white according to frequency. |
+| `smooth` | Blends the dominant color toward the second most dominant color, producing more saturated results. |
+| `confidence` | Similar to `white`, but requires stronger dominance and applies reduced opacity to emphasize consensus areas. |
+
+Example:
+
+```bash
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -renderMode smooth
+```
+
+---
+
+### `-input`
+
+Specifies the directory containing PNG images or subdirectories of PNG images.
+
+**Default:** `.noaa`
+
+Behavior:
+
+- If `.noaa` is used (default), NOAA images may be downloaded automatically.
+- If a custom directory is provided, no automatic download occurs.
+- The program recursively processes subdirectories.
+- Only *leaf directories* (directories without further subdirectories) are processed.
+
+Example:
+
+```bash
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -input ./forecast-data
+```
+
+---
+
+### `-output`
+
+Specifies the directory where generated PNG result images are written.
+
+**Default:** `.` (current directory)
+
+The selected `renderMode` is automatically appended to the output path.  
+This keeps results from different rendering modes separated.
+
+Example:
+
+```bash
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -output ./results
+```
+
+This will create output inside:
+
+```text
+./results/<renderMode>/
+```
+
+---
+
+## Example: Full Command
+
+```bash
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest \
+    -input .noaa \
+    -output ./results \
+    -renderMode confidence
+```
+
+---
