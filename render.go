@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
-	"strings"
 	"text/template"
 	"time"
 )
@@ -31,19 +30,24 @@ func GenerateStaticForecastPage(outputDir string) error {
 	months := make(map[string]*MonthData)
 
 	for _, f := range files {
-		if f.IsDir() || !strings.HasSuffix(f.Name(), ".png") {
+		if f.IsDir() {
 			continue
 		}
 
+		// filter for file names matching calculated weather predictions pattern
 		matches := re.FindStringSubmatch(f.Name())
 		if matches == nil {
 			continue
 		}
 
+		// read variables out from files again,
+		// will allow to incorporate historically computed files as well,
+		// in addition to currently computed ones
 		month := matches[1]
 		variable := matches[3]
 		mode := matches[4]
 
+		// build up logical structure for files
 		if _, exists := months[month]; !exists {
 			displayMonth := month
 			if t, err := time.Parse("200601", month); err == nil {
