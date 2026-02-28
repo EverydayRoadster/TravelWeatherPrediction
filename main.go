@@ -85,6 +85,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't walk: %v", err)
 	}
+
+	err = GenerateStaticForecastPage(outputDir)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func doRender(inputDir, renderMode, outputDir string) {

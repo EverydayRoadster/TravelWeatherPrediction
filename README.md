@@ -81,6 +81,16 @@ It is typically more visually striking than the other modes.
 
 ---
 
+## Interactive Forecast Page
+
+The program automatically generates an `index.html` file in the output directory. This page provides a user-friendly interface to view the consolidated forecast maps:
+
+- **Month Selector:** Buttons at the top allow you to switch between different forecast months (e.g., "Mar 2026", "Apr 2026").
+- **Grid Layout:** For each month, it displays a comparison of different forecast variables (e.g., Temperature, Precipitation) across all available rendering modes.
+
+
+---
+
 ## Installation & Usage
 
 ### Requirements
@@ -155,12 +165,15 @@ go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -input ./forec
 
 ### `-output`
 
-Specifies the directory where generated PNG result images are written.
+Specifies the directory where generated PNG result images and the interactive index page are written.
 
 **Default:** `.` (current directory)
 
-The selected `renderMode` is automatically appended to the output path.  
-This keeps results from different rendering modes separated.
+The program:
+- Appends the selected `renderMode` to the output path for PNG images.
+- Generates an **interactive `index.html`** in the root of the output directory.
+
+The `index.html` provides a consolidated view of all generated forecasts, allowing you to switch between months and view different rendering variables side-by-side.
 
 Example:
 
@@ -168,11 +181,9 @@ Example:
 go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -output ./results
 ```
 
-This will create output inside:
-
-```text
-./results/<renderMode>/
-```
+This will create:
+- PNG images inside `./results/` (organized by month and variable).
+- An interactive overview at `./results/index.html`.
 
 ---
 

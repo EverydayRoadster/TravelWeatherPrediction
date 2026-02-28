@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Travel Weather Prediction</title>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	background: #f4f4f4;
+	text-align: center;
+}
+.month-selector button {
+	margin: 5px;
+	padding: 8px 14px;
+	cursor: pointer;
+}
+.grid {
+	display: none;
+	margin-top: 20px;
+}
+.grid.active {
+	display: block;
+}
+table {
+	margin: 0 auto;
+	border-collapse: collapse;
+}
+th, td {
+	padding: 10px;
+}
+img {
+	max-width: 300px;
+	height: auto;
+	border: 1px solid #ccc;
+}
+</style>
+
+<script>
+function showMonth(month) {
+	document.querySelectorAll(".grid").forEach(el => el.classList.remove("active"));
+	document.getElementById("month-" + month).classList.add("active");
+}
+</script>
+</head>
+<body>
+
+<h1>Travel Weather Prediction</h1>
+
+<div class="month-selector">
+{{range .}}
+<button onclick="showMonth('{{.Month}}')">{{.DisplayMonth}}</button>
+{{end}}
+</div>
+
+{{range .}}
+<div class="grid" id="month-{{.Month}}">
+<h2>{{.DisplayMonth}}</h2>
+<table border="1">
+<tr>
+<th>Variable</th>
+<th>white</th>
+<th>smooth</th>
+<th>confidence</th>
+</tr>
+{{range $var, $modes := .Files}}
+<tr>
+<td>{{$var}}</td>
+<td>{{with index $modes "white"}}<img src="{{.}}">{{end}}</td>
+<td>{{with index $modes "smooth"}}<img src="{{.}}">{{end}}</td>
+<td>{{with index $modes "confidence"}}<img src="{{.}}">{{end}}</td>
+</tr>
+{{end}}
+</table>
+</div>
+{{end}}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+	const first = document.querySelector(".grid");
+	if (first) first.classList.add("active");
+});
+</script>
+
+</body>
+</html>
