@@ -20,7 +20,7 @@ type MonthData struct {
 	Files        map[string]map[string]string // variable -> mode -> filename
 }
 
-func GenerateStaticForecastPage(outputDir string) error {
+func generateForecastPage(outputDir string) error {
 	files, err := os.ReadDir(outputDir)
 	if err != nil {
 		return err

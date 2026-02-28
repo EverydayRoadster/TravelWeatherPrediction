@@ -29,6 +29,14 @@
             "args": ["-input", "./examples/", "-renderMode", "smooth"]
         },
         {
+            "name": "NOAA all",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["-output", "generated", "-renderMode", "all"]
+        },
+        {
             "name": "NOAA white",
             "type": "go",
             "request": "launch",

@@ -45,6 +45,7 @@ function showMonth(month) {
 <body>
 
 <h1>Travel Weather Prediction</h1>
+<p><i>as per github.com/EverydayRoadster/TravelWeatherPrediction</i></p>
 
 <div class="month-selector">
 {{range .}}
@@ -58,9 +59,9 @@ function showMonth(month) {
 <table border="1">
 <tr>
 <th>Variable</th>
-<th>white</th>
-<th>smooth</th>
-<th>confidence</th>
+<th title="Selects the dominant color per pixel and blends it toward white according to its frequency.">white</th>
+<th title="Blends the dominant color toward the second most dominant color, producing more saturated results and smoother transitions.">smooth</th>
+<th title="Requires stronger dominance (above 50%) and applies reduced opacity to emphasize consensus areas.">confidence</th>
 </tr>
 {{range $var, $modes := .Files}}
 <tr>
