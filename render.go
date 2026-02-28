@@ -47,6 +47,15 @@ func GenerateStaticForecastPage(outputDir string) error {
 		variable := matches[3]
 		mode := matches[4]
 
+		// Map short variable names to verbal names for display
+		displayVariable := variable
+		switch variable {
+		case "Prec":
+			displayVariable = "precipitation"
+		case "T2m":
+			displayVariable = "air temperature"
+		}
+
 		// build up logical structure for files
 		if _, exists := months[month]; !exists {
 			displayMonth := month
@@ -60,11 +69,11 @@ func GenerateStaticForecastPage(outputDir string) error {
 			}
 		}
 
-		if _, exists := months[month].Files[variable]; !exists {
-			months[month].Files[variable] = make(map[string]string)
+		if _, exists := months[month].Files[displayVariable]; !exists {
+			months[month].Files[displayVariable] = make(map[string]string)
 		}
 
-		months[month].Files[variable][mode] = f.Name()
+		months[month].Files[displayVariable][mode] = f.Name()
 	}
 
 	if len(months) == 0 {
