@@ -6,6 +6,11 @@ It processes and overlays monthly forecast maps provided by the U.S. National Oc
 > ⚠️ These maps are not precise weather forecasts.  
 > They represent broader climate trends and probabilities across larger regions.
 
+NOAA CPC model NCEP Climate Forecast System Version 2 (CFSv2) was developed at the Environmental Modeling Center at NCEP. It is a fully coupled model representing the interaction between the Earth's atmosphere, oceans, land and seaice. See https://cfs.ncep.noaa.gov/ 
+
+The CFSv2 model provides expected variations in ground temperature and precipitation, as a difference to a standard mean as collected from the years 1990 - 2020. 
+See https://journals.ametsoc.org/view/journals/clim/27/6/jcli-d-12-00823.1.xml 
+
 Currently, map coverage is limited to Europe. Forecast data is typically available up to six months in advance from the current date.
 
 ---
