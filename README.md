@@ -33,10 +33,16 @@ This tool consolidates those results into a single, unified image to:
 
 ## Rendering Modes
 
-The program supports three different methods for consolidating NOAA forecast results.  
+The program supports different methods for consolidating NOAA forecast results.  
 Each mode defines how dominant colors are determined and blended.
 
-### 1. `white` (default)
+### 1. `all` (default)
+
+This is the default mode. It runs all available rendering methods (`white`, `smooth`, and `confidence`) in sequence and generates a comprehensive interactive page.
+
+---
+
+### 2. `white`
 
 The most dominant color at each pixel across all sample images is selected.
 
@@ -115,8 +121,8 @@ The following command line flags are available:
 
 Defines how forecast images are consolidated.
 
-**Default:** `white`  
-**Allowed values:** `white`, `smooth`, `confidence`
+**Default:** `all`  
+**Allowed values:** `all`, `white`, `smooth`, `confidence`
 
 If an unsupported value is provided, the program prints:
 
@@ -130,6 +136,7 @@ and exits without processing.
 
 | Mode | Description |
 |------|------------|
+| `all` | **(Default)** Runs all available modes (`white`, `smooth`, `confidence`) in sequence. |
 | `white` | Selects the dominant color per pixel and blends it toward white according to frequency. |
 | `smooth` | Blends the dominant color toward the second most dominant color, producing more saturated results. |
 | `confidence` | Similar to `white`, but requires stronger dominance and applies reduced opacity to emphasize consensus areas. |
@@ -193,7 +200,7 @@ This will create:
 go run github.com/EverydayRoadster/TravelWeatherPrediction@latest \
     -input .noaa \
     -output ./results \
-    -renderMode confidence
+    -renderMode all
 ```
 
 ---
