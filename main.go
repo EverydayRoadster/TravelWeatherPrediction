@@ -24,26 +24,33 @@ import (
 type Constant int
 
 const (
-	RENDER_WHITE Constant = iota
+	RENDER_ALL Constant = iota
+	RENDER_WHITE
 	RENDER_SMOOTH
 	RENDER_CONFIDENCE
 	DEFAULT_NOAA_DIR
 )
 
-var CNST = []string{"white", "smooth", "confidence", ".noaa"}
+var CNST = []string{"all", "white", "smooth", "confidence", ".noaa"}
 
 func main() {
 	var inputDir, outputDir string
 	var renderMode string
 
-	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_WHITE], "enabled render mode: "+strings.Join([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, ","))
+	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_ALL], "render mode (ALL is default): "+strings.Join([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, ","))
 	flag.StringVar(&inputDir, "input", CNST[DEFAULT_NOAA_DIR], "directory containing PNG images or directories of PNG images")
 	flag.StringVar(&outputDir, "output", ".", "directory for result PNG images. renderMode will be appended to this path.")
 	flag.Parse()
 
-	if !slices.Contains([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
+	if !slices.Contains([]string{CNST[RENDER_ALL], CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
 		log.Printf("render mode %s not supported.", renderMode)
 		return
+	}
+
+	// all modes handler
+	renderModes := []string{renderMode}
+	if renderMode == CNST[RENDER_ALL] {
+		renderModes = []string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}
 	}
 
 	if slices.Contains([]string{CNST[DEFAULT_NOAA_DIR], ""}, inputDir) {
@@ -78,7 +85,9 @@ func main() {
 		}
 		// Leaf directory → do the work
 		if !hasSubdirs {
-			doRender(path, renderMode, outputDir)
+			for _, renderMode := range renderModes {
+				doRender(path, renderMode, outputDir)
+			}
 		}
 		return nil
 	})
@@ -86,7 +95,7 @@ func main() {
 		log.Fatalf("can't walk: %v", err)
 	}
 
-	err = GenerateStaticForecastPage(outputDir)
+	err = generateForecastPage(outputDir)
 	if err != nil {
 		log.Fatal(err)
 	}
