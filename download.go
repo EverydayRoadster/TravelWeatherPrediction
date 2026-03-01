@@ -55,14 +55,22 @@ func getImages(inputDir string) (string, error) {
 			}
 		}
 	}
+
+	skipHistory := -1
 	for history := 0; history < 6; history++ {
 		historyDate := now.AddDate(0, -history, 0)
 		historyMonth := historyDate.Format("200601")
 		for lead := 1; lead <= 6; lead++ {
+			if skipHistory == history {
+				break
+			}
 			forecastMonth := historyDate.AddDate(0, lead-1, 0).Format("200601")
 			// download earlier predictions with relevant forecasts only
 			if generationMonth <= forecastMonth {
 				for _, run := range ensemble {
+					if skipHistory == history {
+						break
+					}
 					for folderName, varCode := range variables {
 						url := buildHistoryURL(varCode, run, lead, historyMonth)
 						savePath := filepath.Join(
@@ -73,9 +81,13 @@ func getImages(inputDir string) (string, error) {
 						)
 						_, err := os.Stat(savePath)
 						if errors.Is(err, os.ErrNotExist) {
-							err := download(url, savePath)
-							if err != nil {
-								fmt.Println("Error:", err)
+							if !(skipHistory == history) {
+								err := download(url, savePath)
+								if err != nil {
+									fmt.Println("Error:", err)
+									skipHistory = history
+									break
+								}
 							}
 						}
 					}
@@ -121,7 +133,7 @@ func download(url, path string) error {
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == 404 {
-			return fmt.Errorf("not (yet available): %s", resp.Request.URL.Path)
+			return fmt.Errorf("This month data not yet available, skipping this month: %s", resp.Request.URL.Path)
 		}
 		return fmt.Errorf("bad status: %s", resp.Status)
 	}
