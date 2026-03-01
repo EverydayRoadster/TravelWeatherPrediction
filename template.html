@@ -42,33 +42,45 @@ function showMonth(month) {
 </head>
 <body>
 
+<p><i>github.com/EverydayRoadster/TravelWeatherPrediction</i></p>
+
 <h1>Travel Weather Prediction</h1>
-<p><i>as per github.com/EverydayRoadster/TravelWeatherPrediction</i></p>
+<p><i> as of {{.RenderDate}}</i></p>
 
 <div class="month-selector">
-{{range .}}
+{{range .Months}}
 <button onclick="showMonth('{{.Month}}')">{{.DisplayMonth}}</button>
 {{end}}
 </div>
 
-{{range .}}
+{{range .Months}}
 <div class="grid" id="month-{{.Month}}">
 <h2>{{.DisplayMonth}}</h2>
 <table border="1">
 <tr>
-<th>Variable</th>
-<th title="Selects the dominant color per pixel and blends it toward white according to its frequency.">white</th>
-<th title="Blends the dominant color toward the second most dominant color, producing more saturated results and smoother transitions.">smooth</th>
-<th title="Requires stronger dominance (above 50%) and applies reduced opacity to emphasize consensus areas.">confidence</th>
-</tr>
+<th>Mode / Variable</th>
 {{range $var, $modes := .Files}}
-<tr>
-<td>{{$var}}</td>
-<td>{{with index $modes "white"}}<img src="{{.}}">{{end}}</td>
-<td>{{with index $modes "smooth"}}<img src="{{.}}">{{end}}</td>
-<td>{{with index $modes "confidence"}}<img src="{{.}}">{{end}}</td>
-</tr>
+<th>{{$var}}</th>
 {{end}}
+</tr>
+<tr>
+<th title="Selects the dominant color per pixel and blends it toward white according to its frequency.">white</th>
+{{range $var, $modes := .Files}}
+<td>{{with index $modes "white"}}<img src="{{.}}">{{end}}</td>
+{{end}}
+</tr>
+<tr>
+<th title="Blends the dominant color toward the second most dominant color, producing more saturated results and smoother transitions.">smooth</th>
+{{range $var, $modes := .Files}}
+<td>{{with index $modes "smooth"}}<img src="{{.}}">{{end}}</td>
+{{end}}
+</tr>
+<tr>
+<th title="Requires stronger dominance (above 50%) and applies reduced opacity to emphasize consensus areas.">confidence</th>
+{{range $var, $modes := .Files}}
+<td>{{with index $modes "confidence"}}<img src="{{.}}">{{end}}</td>
+{{end}}
+</tr>
 </table>
 </div>
 {{end}}

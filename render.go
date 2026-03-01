@@ -20,6 +20,11 @@ type MonthData struct {
 	Files        map[string]map[string]string // variable -> mode -> filename
 }
 
+type PageData struct {
+	RenderDate string
+	Months     []*MonthData
+}
+
 func generateForecastPage(outputDir string) error {
 	files, err := os.ReadDir(outputDir)
 	if err != nil {
@@ -103,5 +108,11 @@ func generateForecastPage(outputDir string) error {
 	}
 	defer file.Close()
 
-	return tmpl.Execute(file, data)
+	renderDate := time.Now().Format("Jan 02 2006")
+
+	pageData := PageData{
+		RenderDate: renderDate,
+		Months:     data,
+	}
+	return tmpl.Execute(file, pageData)
 }
