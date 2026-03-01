@@ -120,6 +120,9 @@ func download(url, path string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == 404 {
+			return fmt.Errorf("not (yet available): %s", resp.Request.URL.Path)
+		}
 		return fmt.Errorf("bad status: %s", resp.Status)
 	}
 
