@@ -13,6 +13,8 @@ import (
 	"github.com/goodsign/monday"
 )
 
+var locale monday.Locale = monday.LocaleEnGB
+
 //go:embed template.html
 var templateFS embed.FS
 
@@ -67,7 +69,7 @@ func generateForecastPage(outputDir string) error {
 		if _, exists := months[month]; !exists {
 			displayMonth := month
 			if t, err := time.Parse("200601", month); err == nil {
-				displayMonth = monday.Format(t, "Jan 2006", monday.LocaleEnGB)
+				displayMonth = monday.Format(t, "Jan 2006", locale)
 			}
 			months[month] = &MonthData{
 				Month:        month,
@@ -110,7 +112,7 @@ func generateForecastPage(outputDir string) error {
 	}
 	defer file.Close()
 
-	renderDate := monday.Format(time.Now(), "Jan 02 2006", monday.LocaleEnGB)
+	renderDate := monday.Format(time.Now(), "Jan 02 2006", locale)
 
 	pageData := PageData{
 		RenderDate: renderDate,
