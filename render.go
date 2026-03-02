@@ -9,6 +9,8 @@ import (
 	"sort"
 	"text/template"
 	"time"
+
+	"github.com/goodsign/monday"
 )
 
 //go:embed template.html
@@ -65,7 +67,7 @@ func generateForecastPage(outputDir string) error {
 		if _, exists := months[month]; !exists {
 			displayMonth := month
 			if t, err := time.Parse("200601", month); err == nil {
-				displayMonth = t.Format("Jan 2006")
+				displayMonth = monday.Format(t, "Jan 2006", monday.LocaleEnGB)
 			}
 			months[month] = &MonthData{
 				Month:        month,
@@ -108,7 +110,7 @@ func generateForecastPage(outputDir string) error {
 	}
 	defer file.Close()
 
-	renderDate := time.Now().Format("Jan 02 2006")
+	renderDate := monday.Format(time.Now(), "Jan 02 2006", monday.LocaleEnGB)
 
 	pageData := PageData{
 		RenderDate: renderDate,
