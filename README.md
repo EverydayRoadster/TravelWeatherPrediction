@@ -29,10 +29,9 @@ This tool consolidates those results into a single, unified image to:
 
 ## Data Handling
 
-- Source images downloaded from NOAA are stored in the directory `.noaa`.
+- Source images downloaded from NOAA are stored in the user's home directory under `.noaa`. This allows for reuse of downloads even when the command is run from different locations.
 - Downloaded images are reused in subsequent runs.
 - Obsolete source images are automatically cleaned up when the program runs.
-- If a custom input directory is used, no automatic download occurs.
 
 ---
 
@@ -116,8 +115,6 @@ go run github.com/EverydayRoadster/TravelWeatherPrediction@latest
 
 ---
 
----
-
 ## Command Line Arguments (Detailed)
 
 The following command line flags are available:
@@ -156,16 +153,13 @@ go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -renderMode sm
 
 ### `-input`
 
-Specifies the directory containing PNG images or subdirectories of PNG images.
+Specifies a custom directory for stoing PNG images downloaded from NOAA.
 
-**Default:** `.noaa`
+**Default:** `~/.noaa` (user's home directory)
 
 Behavior:
 
-- If `.noaa` is used (default), NOAA images may be downloaded automatically.
-- If a custom directory is provided, no automatic download occurs.
-- The program recursively processes subdirectories.
-- Only *leaf directories* (directories without further subdirectories) are processed.
+- If the default home directory or a custom path is used, NOAA images may download on demand, automatically.
 
 Example:
 
@@ -203,7 +197,6 @@ This will create:
 
 ```bash
 go run github.com/EverydayRoadster/TravelWeatherPrediction@latest \
-    -input .noaa \
     -output ./results \
     -renderMode all
 ```
