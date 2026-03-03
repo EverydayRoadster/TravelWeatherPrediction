@@ -69,7 +69,7 @@ func generateForecastPage(outputDir string) error {
 		if _, exists := months[month]; !exists {
 			displayMonth := month
 			if t, err := time.Parse("200601", month); err == nil {
-				displayMonth = monday.Format(t, "Jan 2006", locale)
+				displayMonth = monday.Format(t, "January 2006", locale)
 			}
 			months[month] = &MonthData{
 				Month:        month,
