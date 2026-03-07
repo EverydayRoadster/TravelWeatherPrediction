@@ -45,6 +45,14 @@
             "args": ["-input", "examples", "-output", "generated", "-renderMode", "all"]
         },
         {
+            "name": "NOAA myNOAA all -6",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": ["-output", "generated", "-cleanupDays", "6"]
+        },
+        {
             "name": "NOAA white",
             "type": "go",
             "request": "launch",
