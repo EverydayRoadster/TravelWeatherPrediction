@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/png"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,34 +16,34 @@ import (
 const baseURL = "https://www.cpc.ncep.noaa.gov/products/CFSv2/"
 const historyURL = "https://www.cpc.ncep.noaa.gov/products/CFSv2/cfsv2_fcst_history/"
 
-var variables = map[string]string{
+var parameters = map[string]string{
 	"Europe_T2m":  "euT2m",
 	"Europe_Prec": "euPrec",
 }
 
-// var ensemble = []string{"E1", "E2", "E3"}
 var ensemble = []string{"1", "2", "3"}
 
-// downloadImages is a stub that should download a predefined set of images
-// and return the path to the directory where they are stored.
-func getImages(inputDir string) (string, error) {
+func getImages(inputDir string, cleanupDays int) error {
 	now := time.Now().UTC()
-	generationMonth := now.Format("200601")
-	//	generationDayHour := now.Format("0215")
-	generationDayHour := now.Format("02")
 
-	for folderName, varCode := range variables {
-		for lead := 1; lead <= 6; lead++ {
+	currentMonth := now.Format("200601")
+	currentDay := now.Format("02")
+
+	cleanupOldForecastImages(inputDir, currentMonth, now, cleanupDays)
+
+	// current calculation run (daily) images
+	for paramName, paramCode := range parameters {
+		for lead := 0; lead < 6; lead++ {
 
 			forecastMonth := now.AddDate(0, lead, 0).Format("200601")
 			for _, run := range ensemble {
 
-				url := buildCurrentURL(varCode, run, lead)
+				url := buildCurrentURL(paramCode, run, lead+1)
 				savePath := filepath.Join(
 					inputDir,
-					folderName,
+					paramName,
 					forecastMonth,
-					fmt.Sprintf("%s%s_%s.png", generationMonth, generationDayHour, run),
+					fmt.Sprintf("%s%s_%s.png", currentMonth, currentDay, run),
 				)
 				_, err := os.Stat(savePath)
 				if errors.Is(err, os.ErrNotExist) {
@@ -56,8 +57,9 @@ func getImages(inputDir string) (string, error) {
 		}
 	}
 
+	// history calculated images
 	skipHistory := -1
-	for history := 0; history < 6; history++ {
+	for history := 1; history <= 6; history++ {
 		historyDate := now.AddDate(0, -history, 0)
 		historyMonth := historyDate.Format("200601")
 		for lead := 1; lead <= 6; lead++ {
@@ -66,16 +68,16 @@ func getImages(inputDir string) (string, error) {
 			}
 			forecastMonth := historyDate.AddDate(0, lead-1, 0).Format("200601")
 			// download earlier predictions with relevant forecasts only
-			if generationMonth <= forecastMonth {
+			if currentMonth <= forecastMonth {
 				for _, run := range ensemble {
 					if skipHistory == history {
 						break
 					}
-					for folderName, varCode := range variables {
+					for paramName, varCode := range parameters {
 						url := buildHistoryURL(varCode, run, lead, historyMonth)
 						savePath := filepath.Join(
 							inputDir,
-							folderName,
+							paramName,
 							forecastMonth,
 							fmt.Sprintf("%s_%s.png", historyMonth, run),
 						)
@@ -95,10 +97,7 @@ func getImages(inputDir string) (string, error) {
 			}
 		}
 	}
-
-	cleanupOldForecasts(inputDir, now)
-
-	return inputDir, nil
+	return nil
 }
 
 func buildCurrentURL(variable, run string, lead int) string {
@@ -183,29 +182,50 @@ func cropImage(reader io.Reader) (image.Image, error) {
 	return cropped, nil
 }
 
-func cleanupOldForecasts(inputDir string, now time.Time) {
-	currentMonth := now.Format("200601")
+func cleanupOldForecastImages(inputDir, currentMonth string, now time.Time, cleanupDays int) {
+	latestCleanupDay := now.AddDate(0, 0, -cleanupDays).Format("20060102")
 
-	for folderName := range variables {
-		varDir := filepath.Join(inputDir, folderName)
-		entries, err := os.ReadDir(varDir)
+	for paramName := range parameters {
+		paramDir := filepath.Join(inputDir, paramName)
+		forecastMonths, err := listFiles(paramDir, "??????")
 		if err != nil {
 			continue
 		}
-		for _, entry := range entries {
-			if !entry.IsDir() {
+		for _, forecastMonth := range forecastMonths {
+			fullMonthPath := filepath.Join(paramDir, forecastMonth)
+
+			// If forecast month is before current month → delete entire folder
+			if forecastMonth < currentMonth {
+				fmt.Println("Deleting old forecast folder:", fullMonthPath)
+				err := os.RemoveAll(fullMonthPath)
+				if err != nil {
+					fmt.Println("Error deleting folder:", err)
+				}
 				continue
 			}
-			forecastMonth := entry.Name()
-			// If forecast month is before current month → delete
-			if forecastMonth < currentMonth {
-				fullPath := filepath.Join(varDir, forecastMonth)
-				fmt.Println("Deleting old forecast folder:", fullPath)
-				err := os.RemoveAll(fullPath)
+
+			// Clean up daily downloads (yyyyMMdd_run.png) older than latestCleanupDay
+			dailyImageFiles, err := listFiles(fullMonthPath, "????????_?.png")
+			if err != nil {
+				continue
+			}
+			for _, fileName := range dailyImageFiles {
+				if fileName[:8] > latestCleanupDay {
+					break
+				}
+				filePath := filepath.Join(fullMonthPath, fileName)
+				fmt.Println("Deleting old daily forecast file:", filePath)
+				err := os.Remove(filePath)
 				if err != nil {
-					fmt.Println("Error deleting:", err)
+					fmt.Println("Error deleting file:", err)
 				}
 			}
 		}
 	}
+}
+
+func listFiles(dir, pattern string) ([]string, error) {
+	fileSystem := os.DirFS(dir)
+
+	return fs.Glob(fileSystem, pattern)
 }

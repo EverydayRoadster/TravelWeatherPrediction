@@ -36,6 +36,7 @@ var CNST = []string{"all", "white", "smooth", "confidence", ".noaa", "."}
 
 func main() {
 	var outputDir, renderMode string
+	var cleanupDays int
 
 	inputDir, err := os.UserHomeDir()
 	inputDir += string(filepath.Separator) + CNST[DEFAULT_NOAA_DIR]
@@ -43,22 +44,22 @@ func main() {
 	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_ALL], "render mode (ALL is default): "+strings.Join([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, ","))
 	flag.StringVar(&inputDir, "input", inputDir, "directory containing PNG images or directories of PNG images")
 	flag.StringVar(&outputDir, "output", CNST[DEFAULT_OUTPUT_DIR], "directory for result PNG images")
+	flag.IntVar(&cleanupDays, "cleanupDays", 12, "number of days to keep daily download files")
 	flag.Parse()
+
+	err = getImages(inputDir, cleanupDays)
+	if err != nil {
+		log.Fatalf("failed to download images: %v", err)
+	}
 
 	if !slices.Contains([]string{CNST[RENDER_ALL], CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
 		log.Printf("render mode %s not supported.", renderMode)
 		return
 	}
-
 	// all modes handler
 	renderModes := []string{renderMode}
 	if renderMode == CNST[RENDER_ALL] {
 		renderModes = []string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}
-	}
-
-	inputDir, err = getImages(inputDir)
-	if err != nil {
-		log.Fatalf("failed to download images: %v", err)
 	}
 
 	err = filepath.WalkDir(inputDir, func(path string, dir fs.DirEntry, err error) error {
@@ -98,6 +99,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("index.html generated")
 }
 
 func doRender(inputDir, renderMode, outputDir string) {

@@ -193,6 +193,24 @@ This will create:
 
 ---
 
+### `-cleanupDays`
+
+Specifies the number of days to keep downloads of daily calculation files.
+
+**Default:** `12`
+
+This parameter helps to keep the prediction more robust, as it effectively declares a stable relation between very new calculations and historic calculations. 
+
+The default of 12, compared to the historic 6 month, means, the relevance of current calculations is 2/3 overall, or twice as high as historic calculations.
+
+Example:
+
+```bash
+go run github.com/EverydayRoadster/TravelWeatherPrediction@latest -cleanupDays 14
+```
+
+---
+
 ## Example: Full Command
 
 ```bash
