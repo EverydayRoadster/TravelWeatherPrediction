@@ -102,21 +102,21 @@ func generateForecastPage(outputDir string) error {
 
 	tmpl, err := template.ParseFS(templateFS, "template.html")
 	if err != nil {
-		return err
+		return fmt.Errorf("template.html could not be loaded.")
 	}
 
 	outFile := filepath.Join(outputDir, "index.html")
 	file, err := os.Create(outFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating index.html file.")
 	}
 	defer file.Close()
 
-	renderDate := monday.Format(time.Now(), "Jan 02 2006", locale)
-
 	pageData := PageData{
-		RenderDate: renderDate,
+		RenderDate: monday.Format(time.Now(), "Jan 02 2006", locale),
 		Months:     data,
 	}
+	fmt.Println("writing index.html...")
+
 	return tmpl.Execute(file, pageData)
 }

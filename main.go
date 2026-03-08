@@ -99,7 +99,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("index.html generated")
 }
 
 func doRender(inputDir, renderMode, outputDir string) {

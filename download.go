@@ -149,7 +149,7 @@ func download(url, path string) error {
 
 	image, err := cropImage(resp.Body)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to crop: %s", out.Name())
 	}
 
 	err = png.Encode(out, image)
@@ -225,7 +225,5 @@ func cleanupOldForecastImages(inputDir, currentMonth string, now time.Time, clea
 }
 
 func listFiles(dir, pattern string) ([]string, error) {
-	fileSystem := os.DirFS(dir)
-
-	return fs.Glob(fileSystem, pattern)
+	return fs.Glob(os.DirFS(dir), pattern)
 }
