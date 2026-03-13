@@ -31,16 +31,18 @@ func getImages(inputDir string, cleanupDays int) error {
 
 	cleanupOldForecastImages(inputDir, currentMonth, now, cleanupDays)
 
+	// two caculation periods prior to the current month end, prediction month range switches over to next month
+	switchDay := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day() - 20
+	monthAdjustment := 0
+	if now.Day() > switchDay {
+		monthAdjustment = 1
+	}
+
 	// current calculation run (daily) images
 	for paramName, paramCode := range parameters {
 		for lead := 0; lead < 6; lead++ {
-			monthAdjustment := 0
-			if now.Day() > 11 { // this logic may need to become more sophisticated
-				monthAdjustment = 1
-			}
 			forecastMonth := now.AddDate(0, lead+monthAdjustment, 0).Format("200601")
 			for _, run := range ensemble {
-
 				url := buildCurrentURL(paramCode, run, lead+1)
 				savePath := filepath.Join(
 					inputDir,
