@@ -34,8 +34,11 @@ func getImages(inputDir string, cleanupDays int) error {
 	// current calculation run (daily) images
 	for paramName, paramCode := range parameters {
 		for lead := 0; lead < 6; lead++ {
-
-			forecastMonth := now.AddDate(0, lead, 0).Format("200601")
+			monthAdjustment := 0
+			if now.Day() > 11 { // this logic may need to become more sophisticated
+				monthAdjustment = 1
+			}
+			forecastMonth := now.AddDate(0, lead+monthAdjustment, 0).Format("200601")
 			for _, run := range ensemble {
 
 				url := buildCurrentURL(paramCode, run, lead+1)
