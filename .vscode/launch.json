@@ -42,7 +42,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}",
-            "args": ["-input", "examples", "-output", "generated", "-renderMode", "all"]
+            "args": ["-output", "generated", "-renderMode", "all"]
         },
         {
             "name": "NOAA myNOAA all -6",

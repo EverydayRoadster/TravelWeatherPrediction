@@ -175,7 +175,13 @@ func doRender(inputDir, renderMode, outputDir string) {
 			} else {
 				confidence := float64(maxCnt) / float64(len(imgList)) // towards white
 				if renderMode == CNST[RENDER_CONFIDENCE] {            // towards 50%
-					confidence = 2*confidence - 1
+					threshold := 0.5 // default threshold: 50% of images must match for confidence
+					if strings.Contains(inputDir, "Prec") {
+						// Precipitation has a finer scale (more categories), so exact matches are rarer.
+						// set threshold lower according to scale at 50% threshold
+						threshold = 0.25
+					}
+					confidence = (confidence - threshold) / (1 - threshold)
 					if confidence < 0 {
 						confidence = 0
 					}
