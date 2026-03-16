@@ -32,7 +32,7 @@ const (
 	DEFAULT_OUTPUT_DIR
 )
 
-var CNST = []string{"all", "white", "smooth", "confidence", ".noaa", "."}
+var CNST = []string{"all", "general", "tendency", "confidence", ".noaa", "."}
 
 func main() {
 	var outputDir, renderMode string
