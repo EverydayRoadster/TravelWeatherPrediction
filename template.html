@@ -82,19 +82,19 @@ function showMonth(month, btn) {
 {{end}}
 </tr>
 <tr>
-<th title="Selects the dominant color per pixel and blends it toward white according to its frequency.">white</th>
+<th title="From all ensembles and calculations, it selects the dominant color per pixel and blends it toward white according to frequency of that color. This correlates with core NOAA prediction, but with average across all ensembles and calculation results downloaded.">general</th>
 {{range $var, $modes := .Files}}
 <td>{{with index $modes "white"}}<img src="{{.}}">{{end}}</td>
 {{end}}
 </tr>
 <tr>
-<th title="Blends the dominant color toward the second most dominant color, producing more saturated results and smoother transitions.">smooth</th>
+<th title="Blends the dominant prediction color toward the second most dominant prediction color, indicating an expected ambience and overall tendency for the prognosis, by producing more saturated results and smoother transitions.">tendency</th>
 {{range $var, $modes := .Files}}
 <td>{{with index $modes "smooth"}}<img src="{{.}}">{{end}}</td>
 {{end}}
 </tr>
 <tr>
-<th title="Requires stronger dominance (above 50%) and applies reduced opacity to emphasize consensus areas.">confidence</th>
+<th title="Requires stronger dominance (above 50%) in the occurance for one result and applies reduced opacity, to emphasize consensus areas. This expresses the confidence of the prediction over multiple ensebles and days of calculation downloaded.">confidence</th>
 {{range $var, $modes := .Files}}
 <td>{{with index $modes "confidence"}}<img src="{{.}}">{{end}}</td>
 {{end}}
