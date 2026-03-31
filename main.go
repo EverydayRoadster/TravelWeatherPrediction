@@ -25,8 +25,8 @@ type Constant int
 
 const (
 	RENDER_ALL Constant = iota
-	RENDER_WHITE
-	RENDER_SMOOTH
+	RENDER_GENERAL
+	RENDER_TENDENCY
 	RENDER_CONFIDENCE
 	DEFAULT_NOAA_DIR
 	DEFAULT_OUTPUT_DIR
@@ -41,7 +41,7 @@ func main() {
 	inputDir, err := os.UserHomeDir()
 	inputDir += string(filepath.Separator) + CNST[DEFAULT_NOAA_DIR]
 
-	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_ALL], "render mode (ALL is default): "+strings.Join([]string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, ","))
+	flag.StringVar(&renderMode, "renderMode", CNST[RENDER_ALL], "render mode (ALL is default): "+strings.Join([]string{CNST[RENDER_GENERAL], CNST[RENDER_TENDENCY], CNST[RENDER_CONFIDENCE]}, ","))
 	flag.StringVar(&inputDir, "input", inputDir, "directory containing PNG images or directories of PNG images")
 	flag.StringVar(&outputDir, "output", CNST[DEFAULT_OUTPUT_DIR], "directory for result PNG images")
 	flag.IntVar(&cleanupDays, "cleanupDays", 12, "number of days to keep daily download files")
@@ -52,14 +52,14 @@ func main() {
 		log.Fatalf("failed to download images: %v", err)
 	}
 
-	if !slices.Contains([]string{CNST[RENDER_ALL], CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}, renderMode) {
+	if !slices.Contains([]string{CNST[RENDER_ALL], CNST[RENDER_GENERAL], CNST[RENDER_TENDENCY], CNST[RENDER_CONFIDENCE]}, renderMode) {
 		log.Printf("render mode %s not supported.", renderMode)
 		return
 	}
 	// all modes handler
 	renderModes := []string{renderMode}
 	if renderMode == CNST[RENDER_ALL] {
-		renderModes = []string{CNST[RENDER_WHITE], CNST[RENDER_SMOOTH], CNST[RENDER_CONFIDENCE]}
+		renderModes = []string{CNST[RENDER_GENERAL], CNST[RENDER_TENDENCY], CNST[RENDER_CONFIDENCE]}
 	}
 
 	err = filepath.WalkDir(inputDir, func(path string, dir fs.DirEntry, err error) error {
@@ -163,7 +163,7 @@ func doRender(inputDir, renderMode, outputDir string) {
 			if max2Cnt == -1 {
 				max2C = maxC
 			}
-			if renderMode == CNST[RENDER_SMOOTH] {
+			if renderMode == CNST[RENDER_TENDENCY] {
 				w1 := float64(maxCnt) / float64(maxCnt+max2Cnt)
 				w2 := float64(max2Cnt) / float64(maxCnt+max2Cnt)
 
