@@ -25,6 +25,7 @@ var ensemble = []string{"1", "2", "3"}
 
 func getImages(inputDir string, cleanupDays int) error {
 	now := time.Now().UTC()
+	firstDayInMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
 	currentMonth := now.Format("200601")
 	currentDay := now.Format("02")
@@ -41,7 +42,7 @@ func getImages(inputDir string, cleanupDays int) error {
 	// current calculation run (daily) images
 	for paramName, paramCode := range parameters {
 		for lead := 0; lead < 6; lead++ {
-			forecastMonth := now.AddDate(0, lead+monthAdjustment, 0).Format("200601")
+			forecastMonth := firstDayInMonth.AddDate(0, lead+monthAdjustment, 0).Format("200601") // do something about last day of a month being 31
 			for _, run := range ensemble {
 				url := buildCurrentURL(paramCode, run, lead+1)
 				savePath := filepath.Join(
@@ -65,7 +66,7 @@ func getImages(inputDir string, cleanupDays int) error {
 	// history calculated images
 	skipHistory := -1
 	for history := 1; history <= 6; history++ {
-		historyDate := now.AddDate(0, -history, 0)
+		historyDate := firstDayInMonth.AddDate(0, -history, 0) // do something about last day of a month being 31
 		historyMonth := historyDate.Format("200601")
 		for lead := 1; lead <= 6; lead++ {
 			if skipHistory == history {
