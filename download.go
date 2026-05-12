@@ -33,7 +33,7 @@ func getImages(inputDir string, cleanupDays int) error {
 	cleanupOldForecastImages(inputDir, currentMonth, now, cleanupDays)
 
 	// two caculation periods prior to the current month end, prediction month range switches over to next month
-	switchDay := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day() - 20
+	switchDay := time.Date(now.Year(), now.Month()+1, 0, 0, 0, 0, 0, time.UTC).Day() - 19
 	monthAdjustment := 0
 	if now.Day() > switchDay {
 		monthAdjustment = 1
